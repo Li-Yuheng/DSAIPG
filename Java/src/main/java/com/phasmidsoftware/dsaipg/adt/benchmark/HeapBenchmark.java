@@ -34,7 +34,7 @@ public class HeapBenchmark {
     }
 
     private static void benchmarkBinaryHeap(String name, boolean floyd, Comparator<Integer> comparator) {
-        Benchmark_Timer<PriorityQueue<Integer>> timer = new Benchmark_Timer<>(
+        Benchmark_Timer<PriorityQueue_BinaryHeap<Integer>> timer = new Benchmark_Timer<>(
                 name,
                 heap -> {
                     for (int num : testData) {
@@ -54,7 +54,7 @@ public class HeapBenchmark {
                             highestPriority = Math.max(highestPriority, removed);
                         }
                     }
-                    //System.out.println(name + " highest priority spilled: " + highestPriority+"; highest priority overflowed:"+heap.getHighestOverflowElement());
+                    System.out.println(name + " highest priority spilled: " + highestPriority+"; highest priority overflowed:"+heap.getHighestOverflowElement());
                 }
         );
 

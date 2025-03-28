@@ -46,9 +46,24 @@ public class PriorityQueue_BinaryHeap<K> implements PriorityQueue<K>, Iterable<K
      * @param key the element to be inserted into the priority queue
      */
     public void give(K key) {
-        if (m == binHeap.length - first) m--;
+        if (m == binHeap.length - first) {
+            K overflowElement = binHeap[m + first - 1];
+            overflowQueue.add(overflowElement);
+            updateHighestOverflowElement(overflowElement);
+            m--;
+        }
         binHeap[++m + first - 1] = key;
         swimUp(m + first - 1);
+    }
+
+    private void updateHighestOverflowElement(K element) {
+        if (highestOverflowElement == null || comparator.compare(element, highestOverflowElement) > 0) {
+            highestOverflowElement = element;
+        }
+    }
+
+    public K getHighestOverflowElement() {
+        return highestOverflowElement;
     }
 
     /**
@@ -370,5 +385,8 @@ public class PriorityQueue_BinaryHeap<K> implements PriorityQueue<K>, Iterable<K
      * When enabled, this optimization adjusts the binary heap to enhance performance in specific scenarios.
      */
     private final boolean floyd;
+
+    private Queue<K> overflowQueue = new LinkedList<>();
+    private K highestOverflowElement = null;
 
 }

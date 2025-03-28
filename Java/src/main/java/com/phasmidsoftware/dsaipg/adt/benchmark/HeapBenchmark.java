@@ -1,7 +1,8 @@
 package com.phasmidsoftware.dsaipg.adt.benchmark;
 
+import com.phasmidsoftware.dsaipg.adt.pq.*;
 import com.phasmidsoftware.dsaipg.adt.pq.PriorityQueue;
-import com.phasmidsoftware.dsaipg.util.Benchmark_Timer;
+import com.phasmidsoftware.dsaipg.util.benchmark.Benchmark_Timer;
 
 import java.util.*;
 
@@ -53,11 +54,11 @@ public class HeapBenchmark {
                             highestPriority = Math.max(highestPriority, removed);
                         }
                     }
-                    System.out.println(name + " highest priority spilled: " + highestPriority+"; highest priority overflowed:"+heap.getHighestOverflowElement());
+                    //System.out.println(name + " highest priority spilled: " + highestPriority+"; highest priority overflowed:"+heap.getHighestOverflowElement());
                 }
         );
 
-        double time = timer.runFromSupplier(() -> new PriorityQueue<>(M, true, comparator, floyd), 5);
+        double time = timer.runFromSupplier(() -> new PriorityQueue_BinaryHeap<>(M, true, comparator, floyd), 5);
         System.out.println(name + " average time: " + time + " ms");
     }
 

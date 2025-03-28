@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2024. Robin Hillyard
+ */
+
 package com.phasmidsoftware.dsaipg.util.benchmark;
 
 import com.phasmidsoftware.dsaipg.util.logging.LazyLogger;
@@ -11,13 +15,6 @@ import java.util.function.UnaryOperator;
  * Class which is able to time the running of functions.
  */
 public class Timer {
-
-    /**
-     * A static, thread-safe logger instance used to log events within the Timer class.
-     * Maintains a lazy initialization approach to optimize performance while minimizing memory usage.
-     * Specifically targets the Timer class for logging purposes.
-     */
-    final static LazyLogger logger = new LazyLogger(Timer.class);
 
     /**
      * Run the given function n times, once per "lap" and then return the result of calling meanLapTime().
@@ -68,10 +65,55 @@ public class Timer {
      * @param <U>          the type which is the result of function and the input to postFunction (if any).
      * @return the average milliseconds per repetition.
      */
-    public <T, U> double repeat(int n, boolean warmup, Supplier<T> supplier, Function<T, U> function, UnaryOperator<T> preFunction, Consumer<U> postFunction) {
-        // TO BE IMPLEMENTED : note that the timer is running when this method is called and should still be running when it returns.
-         return 0;
-        // END SOLUTION
+    public <T, U> double repeat(int n, boolean warmup, Supplier<T> supplier,
+                                Function<T, U> function, UnaryOperator<T> preFunction,
+                                Consumer<U> postFunction) {
+        if (n == 0)
+            return 0.0;
+        if (n < 0)
+            throw new IllegalArgumentException("Number of repetitions must be positive");
+
+
+        double totalFunctionTime = 0;
+        for (int i = 0; i < n; i++) {
+            T t = supplier.get();
+            if (preFunction != null)
+                t = preFunction.apply(t);
+
+            long funcStartTime = getClock();
+            U result = function.apply(t);
+            long funcEndTime = getClock();
+
+            if (postFunction != null)
+                postFunction.accept(result);
+
+            totalFunctionTime += toMillisecs(funcEndTime - funcStartTime);
+            lap();
+        }
+        pause();
+
+        double meanFunctionTime = totalFunctionTime / n;
+        resume();
+        return meanFunctionTime;
+    }
+
+
+    /**
+     * Updates the status display by printing progress markers or a decrement value based on the input parameters.
+     * Used for visual feedback during processes that involve incremental progress.
+     *
+     * @param lastx the previous state or value of x being tracked.
+     * @param x     the current state or value of x being tracked; must remain constant within this method's execution.
+     * @return the updated current value of x.
+     */
+    private static int doPrintStatus(int lastx, final int x) {
+        if (x != lastx) {
+            if (x % 10 == 0)
+                System.out.print(10 - x / 10);
+            else
+                System.out.print(".");
+        }
+        return x;
     }
 
     /**
@@ -175,24 +217,6 @@ public class Timer {
         resume();
     }
 
-    /**
-     * Updates the status display by printing progress markers or a decrement value based on the input parameters.
-     * Used for visual feedback during processes that involve incremental progress.
-     *
-     * @param lastx the previous state or value of x being tracked.
-     * @param x     the current state or value of x being tracked; must remain constant within this method's execution.
-     * @return the updated current value of x.
-     */
-    private static int doPrintStatus(int lastx, final int x) {
-        if (x != lastx) {
-            if (x % 10 == 0)
-                System.out.print(10 - x / 10);
-            else
-                System.out.print(".");
-        }
-        return x;
-    }
-
     private static <T> void doTrace(final boolean condition, Supplier<String> messageFunction) {
         if (logger.isTraceEnabled() && condition) logger.trace(messageFunction.get());
     }
@@ -243,10 +267,8 @@ public class Timer {
      *
      * @return the number of ticks for the system clock. Currently defined as nano time.
      */
-    private static long getClock() {
-        // TO BE IMPLEMENTED 
-         return 0;
-        // END SOLUTION
+    public static long getClock() {
+        return System.nanoTime();
     }
 
     /**
@@ -256,11 +278,10 @@ public class Timer {
      * @param ticks the number of clock ticks -- currently in nanoseconds.
      * @return the corresponding number of milliseconds.
      */
-    private static double toMillisecs(long ticks) {
-        // TO BE IMPLEMENTED 
-         return 0;
-        // END SOLUTION
+    public static double toMillisecs(long ticks) {
+        return ticks / 1_000_000.0;
     }
+    final static LazyLogger logger = new LazyLogger(Timer.class);
 
     /**
      * TimerException is a custom unchecked exception used to indicate errors or invalid states
